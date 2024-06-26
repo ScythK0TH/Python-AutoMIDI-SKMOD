@@ -42,7 +42,15 @@ key_legit_mode = 'insert'
 
 def runPyMIDI():
     try:
-        pyMIDI.main()
+        global isPlaying, infoTuple, playback_speed, selectedsong, storedIndex, elapsedTime
+        selectedsong = get_song_choice()
+        storedIndex = 0
+        elapsedTime = 0
+        infoTuple = processFile()
+        if infoTuple is None:
+            return
+        infoTuple[2] = parseInfo()
+        printControls()
     except Exception as e:
         print(f"pyMIDI.py was interrupted or encountered an error: {e}")
 
