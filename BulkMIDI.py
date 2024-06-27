@@ -354,9 +354,9 @@ class MidiFile:
 			for s in self.midiRecord_list:
 				f.write(s)
 		return
-		
-def get_file_choice():
-    midi_folder = 'midi'
+	
+def bulkmidi():
+    midi_folder = 'midibulk'
     if not os.path.exists(midi_folder):
         os.makedirs(midi_folder)
     
@@ -365,13 +365,29 @@ def get_file_choice():
         print("No MIDI files detected. Please add MIDI files to the 'midi' folder.")
         return None
 
-    print("\nType the number of a MIDI file and press enter:\n")
+    print("\nAll MIDI Converting\n")
+    input("Are you ready?")
     for i, midi_file in enumerate(midList):
         print(f"{i + 1}: {midi_file}")
 
     try:
-        choice = int(input("> "))
-        return os.path.join(midi_folder, midList[choice - 1])
+        for e_midi in midList:
+            midi_file = os.path.join(midi_folder, e_midi)
+            if midi_file is None:
+                return 1
+            try:
+                midi = MidiFile(midi_file)
+            except Exception as e:
+                print("An error has occurred during processing:\n\n")
+                raise e
+                return 1
+			
+            print(midi_file)
+            song_file = midi_file[9:-4] + ".txt"
+            sheet_file = "sheetConversion.txt"
+			
+            midi.save_song(song_file)
+            midi.save_sheet(sheet_file)
     except (IndexError, ValueError):
         print("Invalid selection. Please try again.")
         return None
@@ -394,23 +410,7 @@ def main():
             print("Make sure this file ends in '.mid'")
             return 1
     else:
-        midi_file = get_file_choice()
-        if midi_file is None:
-            return 1
-
-    try:
-        midi = MidiFile(midi_file)
-    except Exception as e:
-        print("An error has occurred during processing:\n\n")
-        raise e
-        return 1
-    
-    song_file = midi_file[5:-4] + ".txt"
-    sheet_file = "sheetConversion.txt"
-    
-    midi.save_song(song_file)
-    midi.save_sheet(sheet_file)
-    runPlaySong()
+        bulkmidi()
 				
 if __name__ == "__main__":
 	main()
