@@ -1,7 +1,6 @@
 # to build, use "cd (playsong directory)"
 # pyinstaller --onefile playSong.py
 
-import pyMIDI
 import threading
 import random
 import os
@@ -138,30 +137,19 @@ def processFile():
         processedNotes = []
         
         for line in lines[1:]:
-            if 'tempo' in line:
-                try:
-                    tempo = 60 / float(line.split("=")[1])
-                except ValueError:
-                    print("Error: Invalid tempo value")
-                    return None
-            else:
-                l = line.split(" ")
-                if len(l) < 2:
-                    continue
-                try:
-                    waitToPress = float(l[0])
-                    notes = l[1]
-                    processedNotes.append([waitToPress, notes])
-                    if not tOffsetSet:
-                        tOffset = waitToPress
-                        tOffsetSet = True
-                except ValueError:
-                    print("Error: Invalid note format")
-                    continue
-
-        if tempo is None:
-            print("Error: Tempo not specified")
-            return None
+            l = line.split(" ")
+            if len(l) < 2:
+                continue
+            try:
+                waitToPress = float(l[0])
+                notes = l[1]
+                processedNotes.append([waitToPress, notes])
+                if not tOffsetSet:
+                    tOffset = waitToPress
+                    tOffsetSet = True
+            except ValueError:
+                print("Error: Invalid note format")
+                continue
 
     return [tempo, tOffset, processedNotes]
 
@@ -176,7 +164,7 @@ def floorToZero(i):
 def parseInfo():
 	
 	tempo = infoTuple[0]
-	notes = infoTuple[2][1:]
+	notes = infoTuple[2][0:]
 	
 	# parse time between each note
 	# while loop is required because we are editing the array as we go
@@ -192,8 +180,12 @@ def parseInfo():
 			if i < len(notes)-1:
 				nextNote = notes[i+1]
 		else:
-			note[0] = (nextNote[0] - note[0]) * tempo
-			i += 1
+			if tempo is None:
+				print("Error: Tempo not specified")
+				return None
+			else:
+				note[0] = (nextNote[0] - note[0]) * tempo
+				i += 1
 
 	# let's just hold the last note for 1 second because we have no data on it
 	notes[len(notes)-1][0] = 1.00
